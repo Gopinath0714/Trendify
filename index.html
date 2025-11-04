@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Trendify</title>
+  <!-- Modern Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --border:#ddd;--text:#111;--bg:#fff;--muted:#666;
+      --grad:linear-gradient(90deg,#ff6ec4,#7873f5);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text)}
+    header,footer{border-bottom:1px solid var(--border)}
+    footer{border-top:1px solid var(--border);border-bottom:0}
+    .container{max-width:1100px;margin:0 auto;padding:0 16px}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+    .brand{font-weight:700;font-size:28px;background:var(--grad);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .nav-actions{display:flex;gap:12px;align-items:center}
+    .btn{background:var(--grad);color:#fff;border:none;border-radius:8px;
+      padding:10px 16px;cursor:pointer;transition:.2s}
+    .btn.secondary{background:#fff;color:var(--text);border:1px solid var(--border)}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(120,115,245,.4)}
+    .hidden{display:none}
+    .grid{display:grid;gap:16px}
+    @media(min-width:640px){.grid.products{grid-template-columns:repeat(2,1fr)}}
+    @media(min-width:900px){.grid.products{grid-template-columns:repeat(4,1fr)}}
+    .card{border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+    .card img{height:160px;object-fit:cover}
+    .card-body{padding:12px;display:flex;flex-direction:column;gap:6px}
+    .price{font-weight:600}
+    .input{border:1px solid var(--border);border-radius:8px;padding:10px 12px;width:100%}
+    .form{max-width:420px;margin:24px auto;display:grid;gap:12px}
+    .section-title{font-size:22px;font-weight:600;margin:18px 0}
+    .hero{background:var(--grad);color:white;padding:60px 20px;border-radius:12px;text-align:center;margin:20px 0}
+    .hero h1{font-size:40px;margin:0 0 12px}
+    .cart-item{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);border-radius:8px;padding:10px}
+    .footerbar{height:72px;display:flex;align-items:center;justify-content:space-between}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a href="#" class="brand">Trendify</a>
+      <div class="nav-actions">
+        <button class="btn secondary" onclick="show('home')">Products</button>
+        <button class="btn secondary" onclick="show('cart')">Cart</button>
+        <button class="btn secondary" onclick="show('login')">Login</button>
+        <button class="btn" onclick="show('checkout')">Checkout</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Home -->
+    <div class="container" id="page-home">
+      <section class="hero">
+        <h1>Welcome to Trendify</h1>
+        <p>Discover trending products with a modern, colorful vibe.</p>
+      </section>
+      <h2 class="section-title">New arrivals</h2>
+      <div class="grid products" id="products-grid"></div>
+    </div>
+    <!-- Cart -->
+    <div class="container hidden" id="page-cart">
+      <h2 class="section-title">Cart</h2>
+      <div id="cart-list"></div>
+      <div style="margin-top:16px;text-align:right">
+        <span id="cart-total" class="price" style="margin-right:12px">₹0.00</span>
+        <button class="btn secondary" onclick="clearCart()">Clear</button>
+        <button class="btn" onclick="show('checkout')">Checkout</button>
+      </div>
+    </div>
+
+    <!-- Checkout -->
+    <div class="container hidden" id="page-checkout">
+      <h2 class="section-title">Checkout</h2>
+      <p class="muted">Dummy payment for demo.</p>
+      <div class="form">
+        <input class="input" placeholder="Name" />
+        <input class="input" placeholder="Email" />
+        <button class="btn" onclick="finishOrder()">Pay now</button>
+      </div>
+    </div>
+
+    <!-- Thanks -->
+    <div class="container hidden" id="page-thanks">
+      <h2 class="section-title">Thanks for your order!</h2>
+      <p class="muted">You’ll receive a confirmation shortly.</p>
+      <button class="btn" onclick="show('home')">Back to home</button>
+    </div>
+
+    <!-- Login -->
+    <div class="container hidden" id="page-login">
+      <h2 class="section-title">Login</h2>
+      <form class="form" onsubmit="login(event)">
+        <input class="input" id="login-user" placeholder="Username" required />
+        <input class="input" id="login-pass" type="password" placeholder="Password" required />
+        <button class="btn">Login</button>
+        <p class="muted">No account? <a href="#" onclick="show('register')">Register</a></p>
+      </form>
+    </div>
+
+    <!-- Register -->
+    <div class="container hidden" id="page-register">
+      <h2 class="section-title">Register</h2>
+      <form class="form" onsubmit="register(event)">
+        <input class="input" id="reg-user" placeholder="Username" required />
+        <input class="input" id="reg-pass" type="password" placeholder="Password" required />
+        <button class="btn">Register</button>
+        <p class="muted">Already have an account? <a href="#" onclick="show('login')">Login</a></p>
+      </form>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container footerbar">
+      <span>© <span id="year"></span> Trendify</span>
+      <span class="muted">Modern colorful demo</span>
+    </div>
+  </footer>
+  <script>
+    // 25 demo products
+    const products = Array.from({length:25},(_,i)=>({
+      slug:'product-'+(i+1),
+      name:'Product '+(i+1),
+      price:Math.floor(Math.random()*500+100)*100,
+      img:'https://picsum.photos/seed/'+(i+1)+'/600/400'
+    }));
+
+    const state={cart:[]};
+    const pages={
+      home:document.getElementById('page-home'),
+      cart:document.getElementById('page-cart'),
+      checkout:document.getElementById('page-checkout'),
+      thanks:document.getElementById('page-thanks'),
+      login:document.getElementById('page-login'),
+      register:document.getElementById('page-register')
+    };
+
+    function show(page){
+      Object.values(pages).forEach(p=>p.classList.add('hidden'));
+      pages[page].classList.remove('hidden');
+      if(page==='cart') renderCart();
+    }
+
+    function fmtINR(v){return '₹'+(v/100).toFixed(2);}
+
+    function renderProducts(){
+      const grid=document.getElementById('products-grid');
+      grid.innerHTML='';
+      products.forEach(p=>{
+        const card=document.createElement('div');
+        card.className='card';
+        card.innerHTML=`
+          <img src="${p.img}" alt="${p.name}">
+          <div class="card-body">
+            <div style="display:flex;justify-content:space-between">
+              <div>${p.name}</div>
+              <div class="price">${fmtINR(p.price)}</div>
+            </div>
+            <button class="btn" onclick="addToCart('${p.slug}')">Add to cart</button>
+          </div>`;
+        grid.appendChild(card);
+      });
+    }
+
+    function addToCart(slug){
+      const item=state.cart.find(i=>i.slug===slug);
+      if(item) item.qty++;
+      else state.cart.push({slug,qty:1});
+      renderCart();
+    }
+
+    function removeFromCart(slug){
+      state.cart=state.cart.filter(i=>i.slug!==slug);
+      renderCart();
+    }
+
+    function clearCart(){
+      state.cart=[];
+      renderCart();
+    }
+
+    function renderCart(){
+      const list=document.getElementById('cart-list');
+      const totalEl=document.getElementById('cart-total');
+      list.innerHTML='';
+      if(state.cart.length===0){
+        list.innerHTML='<p class="muted">Your cart is empty.</p>';
+        totalEl.textContent=fmtINR(0);
+        return;
+      }
+      let total=0;
+      state.cart.forEach(i=>{
+        const p=products.find(x=>x.slug===i.slug);
+        if(!p) return;
+        total+=p.price*i.qty;
+        const row=document.createElement('div');
+        row.className='cart-item';
+        row.innerHTML=`
+          <div style="display:flex;align-items:center;gap:10px">
+            <img src="${p.img}" style="width:60px;height:60px;object-fit:cover;border-radius:6px">
+            <div>
+              <div style="font-weight:600">${p.name}</div>
+              <div class="muted">Qty: ${i.qty}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div>${fmtINR(p.price*i.qty)}</div>
+            <button class="btn secondary" onclick="removeFromCart('${i.slug}')">Remove</button>
+          </div>`;
+        list.appendChild(row);
+      });
+      totalEl.textContent=fmtINR(total);
+    }
+
+    function finishOrder(){
+      if(state.cart.length===0){alert('Cart is empty');return;}
+      clearCart();
+      show('thanks');
+    }
+
+    function login(e){
+      e.preventDefault();
+      const user=document.getElementById('login-user').value.trim();
+      const pass=document.getElementById('login-pass').value.trim();
+      if(!user||!pass){alert('Enter username and password');return;}
+      alert('Logged in as '+user+' (demo only)');
+      show('home');
+    }
+
+    function register(e){
+      e.preventDefault();
+      const user=document.getElementById('reg-user').value.trim();
+      const pass=document.getElementById('reg-pass').value.trim();
+      if(!user||!pass){alert('Enter username and password');return;}
+      alert('Registered as '+user+' (demo only)');
+      show('home');
+    }
+
+    // Init
+    document.getElementById('year').textContent=new Date().getFullYear();
+    renderProducts();
+    renderCart();
+    show('home');
+  </script>
+</body>
+</html>
